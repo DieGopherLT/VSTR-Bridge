@@ -229,12 +229,31 @@ class BridgeServer {
     private createTerminal(config: TaskConfig): vscode.Terminal {
         const terminalOptions: vscode.TerminalOptions = {
             name: config.name,
-            cwd: config.path || undefined,
+            cwd: config.path ? this.resolveTildePath(config.path) : undefined,
             iconPath: config.icon ? new vscode.ThemeIcon(config.icon) : undefined,
             color: this.parseTerminalColor(config.iconColor)
         };
         
         return vscode.window.createTerminal(terminalOptions);
+    }
+    
+    private resolveTildePath(inputPath: string): string {
+        if (!inputPath.startsWith('~')) {
+            return inputPath;
+        }
+        
+        // Get the home directory from environment variables
+        const homeDir = os.homedir();
+        
+        // Replace ~ with the home directory
+        if (inputPath === '~') {
+            return homeDir;
+        } else if (inputPath.startsWith('~/')) {
+            return inputPath.replace('~', homeDir);
+        }
+        
+        // Return original path if it doesn't match expected patterns
+        return inputPath;
     }
     
     private parseTerminalColor(color?: string): vscode.ThemeColor | undefined {
