@@ -1,0 +1,56 @@
+{
+  "name": "vstr-bridge",
+  "displayName": "VSTR Bridge",
+  "description": "Bridge server for VSCode Terminal Runner CLI",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "vscr-bridge.status",
+        "title": "VSCR Bridge: Show Status"
+      }
+    ],
+    "configuration": {
+      "title": "VSTR Bridge",
+      "properties": {
+        "vstrBridge.autoStart": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically start the bridge server when VSCode opens"
+        },
+        "vstrBridge.port": {
+          "type": "number",
+          "default": 0,
+          "description": "Port for the bridge server (0 = auto-select)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/node": "16.x",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "@vscode/test-electron": "^2.2.0",
+    "eslint": "^8.57.1",
+    "typescript": "^4.9.3"
+  }
+}
