@@ -2,7 +2,12 @@
   "name": "vstr-bridge",
   "displayName": "VSTR Bridge",
   "description": "Bridge server for VSCode Terminal Runner CLI",
-  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DieGopherLT/VSTR-Bridge"
+  },
+  "version": "0.1.1",
+  "publisher": "DieGopherLT",
   "engines": {
     "vscode": "^1.74.0"
   },
@@ -17,7 +22,7 @@
     "commands": [
       {
         "command": "vscr-bridge.status",
-        "title": "VSCR Bridge: Show Status"
+        "title": "VSTR Bridge: Show Status"
       }
     ],
     "configuration": {
@@ -40,6 +45,8 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "install-local": "code --install-extension vstr-bridge-0.1.0.vsix",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "vscode-test"
@@ -50,6 +57,7 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@vscode/test-electron": "^2.2.0",
+    "@vscode/vsce": "^2.19.0",
     "eslint": "^8.57.1",
     "typescript": "^4.9.3"
   }

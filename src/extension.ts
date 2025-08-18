@@ -289,7 +289,7 @@ class BridgeServer {
     
     private showNotification() {
         vscode.window.showInformationMessage(
-            `VSCR Bridge active on port ${this.port}`,
+            `VSTR Bridge active on port ${this.port}`,
             'View Status'
         ).then(selection => {
             if (selection === 'View Status') {
@@ -299,7 +299,7 @@ class BridgeServer {
     }
     
     showStatus() {
-        const message = `VSCR Bridge Status:
+        const message = `VSTR Bridge Status:
         • Port: ${this.port}
         • Workspace: ${vscode.workspace.name}
         • Path: ${vscode.workspace.workspaceFolders?.[0]?.uri.fsPath}`;
