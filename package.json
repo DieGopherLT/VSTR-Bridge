@@ -37,6 +37,29 @@
           "type": "number",
           "default": 0,
           "description": "Port for the bridge server (0 = auto-select)"
+        },
+        "vstrBridge.security.strictMode": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable strict security mode"
+        },
+        "vstrBridge.security.additionalSafeCommands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Additional commands to consider safe"
+        },
+        "vstrBridge.security.maxRequestsPerMinute": {
+          "type": "number",
+          "default": 30,
+          "description": "Maximum requests per minute per client"
+        },
+        "vstrBridge.security.auditLogging": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable security audit logging"
         }
       }
     }
