@@ -119,7 +119,7 @@ export class SecureBridgeServer {
 
             this.server.listen(this.port, 'localhost', () => {
                 // CORREGIDO: Usar output channel en lugar de console.log
-                vscode.window.showInformationMessage(`Secure VSTR Bridge running on port ${this.port}`);
+                vscode.window.showInformationMessage('Secure VSTR Bridge active and ready');
                 this.registerSecureBridge();
                 this.showSecurityNotification();
             });
@@ -422,7 +422,7 @@ export class SecureBridgeServer {
 
     private showSecurityNotification() {
         vscode.window.showInformationMessage(
-            `🔒 Secure VSTR Bridge active on port ${this.port}`,
+            '🔒 Secure VSTR Bridge active and ready',
             'View Status', 'Security Settings'
         ).then(selection => {
             if (selection === 'View Status') {
@@ -436,7 +436,7 @@ export class SecureBridgeServer {
     showStatus() {
         const stats = this.securityMiddleware.getSecurityStats();
         const message = `Secure VSTR Bridge Status:
-        • Port: ${this.port}
+        • Status: Active
         • Workspace: ${vscode.workspace.name}
         • Security: ${stats.config.strictMode ? 'Strict Mode' : 'Permissive Mode'}
         • Blocked Clients: ${stats.blockedClients}
