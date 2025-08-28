@@ -358,27 +358,7 @@ export class SecureBridgeServer {
     private parseTerminalColor(color?: string): vscode.ThemeColor | undefined {
         if (!color) return undefined;
 
-        const colorMap: Record<string, string> = {
-            'terminal.ansiBlack': 'terminal.ansiBlack',
-            'terminal.ansiRed': 'terminal.ansiRed',
-            'terminal.ansiGreen': 'terminal.ansiGreen',
-            'terminal.ansiYellow': 'terminal.ansiYellow',
-            'terminal.ansiBlue': 'terminal.ansiBlue',
-            'terminal.ansiMagenta': 'terminal.ansiMagenta',
-            'terminal.ansiCyan': 'terminal.ansiCyan',
-            'terminal.ansiWhite': 'terminal.ansiWhite',
-            'terminal.ansiBrightBlack': 'terminal.ansiBrightBlack',
-            'terminal.ansiBrightRed': 'terminal.ansiBrightRed',
-            'terminal.ansiBrightGreen': 'terminal.ansiBrightGreen',
-            'terminal.ansiBrightYellow': 'terminal.ansiBrightYellow',
-            'terminal.ansiBrightBlue': 'terminal.ansiBrightBlue',
-            'terminal.ansiBrightMagenta': 'terminal.ansiBrightMagenta',
-            'terminal.ansiBrightCyan': 'terminal.ansiBrightCyan',
-            'terminal.ansiBrightWhite': 'terminal.ansiBrightWhite'
-        };
-
-        const mappedColor = colorMap[color];
-        return mappedColor ? new vscode.ThemeColor(mappedColor) : undefined;
+        return color ? new vscode.ThemeColor(color) : undefined;
     }
 
     private async parseBody<T>(req: http.IncomingMessage): Promise<T> {
