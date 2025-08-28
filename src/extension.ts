@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { VSCodeBridge } from './vscode-bridge';
+import 'dotenv/config';
 
 export async function activate(context: vscode.ExtensionContext) {
     try {

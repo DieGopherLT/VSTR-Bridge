@@ -20,5 +20,9 @@ logs/
 Thumbs.db
 
 # Misc
-.env
 *.env
+
+*.md
+!README.md
+!CLAUDE.md
+config.bat

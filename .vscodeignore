@@ -1,0 +1,9 @@
+node_modules
+.vscode
+.claude
+src
+
+**/*.js.map
+
+*.md
+!README.md
