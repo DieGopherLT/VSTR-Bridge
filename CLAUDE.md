@@ -44,11 +44,12 @@ npm run publish
 
 ### Core Components
 
-**SecureBridgeServer** (`src/secure-bridge-server.ts`):
+**VSCodeBridge** (`src/vscode-bridge.ts`):
 - Main HTTP server handling CLI communication
-- Integrates all security middleware
+- Integrates SQLite database for secure token management
 - Manages terminal creation and command execution
 - Handles `/ping`, `/task`, `/workspace`, and `/security/status` endpoints
+- Implements token pool with automatic refill mechanism
 
 **Security System** (`src/security/`):
 - `SecurityMiddleware`: Central security orchestrator

@@ -1,23 +1,12 @@
 import * as vscode from 'vscode';
 import { VSCodeBridge } from './vscode-bridge';
+import { findAvailablePort } from './utils/port-utils';
 
 export async function activate(context: vscode.ExtensionContext) {
     try {
-        const net = require('net');
-
         console.log('Activating VSTR Bridge extension');
         
-        const port = await new Promise<number>((resolve, reject) => {
-            const server = net.createServer();
-            server.unref();
-            server.on('error', reject);
-            server.listen(0, () => {
-                const port = server.address()?.port;
-                server.close(() => {
-                    resolve(port);
-                });
-            });
-        });
+        const port = await findAvailablePort();
 
         console.log('About to start VSCodeBridge on port:', port);
         const bridge = new VSCodeBridge(port, context);

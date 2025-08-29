@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/DieGopherLT/VSTR-Bridge"
   },
-  "version": "0.4.0",
+  "version": "0.4.4",
   "publisher": "DieGopherLT",
   "engines": {
     "vscode": "^1.74.0"
@@ -21,7 +21,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "vscr-bridge.status",
+        "command": "vstr-bridge.status",
         "title": "VSTR Bridge: Show Status"
       }
     ],
@@ -60,6 +60,11 @@
           "type": "boolean",
           "default": true,
           "description": "Enable security audit logging"
+        },
+        "vstrBridge.silentMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Silence bridge startup notifications"
         }
       }
     }
@@ -69,10 +74,10 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "vsce package",
-    "install-local": "code --install-extension vstr-bridge-0.1.0.vsix",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "recompile": "rm -rf ./dist && npm run compile && npm run package"
   },
   "devDependencies": {
     "@types/node": "16.x",
