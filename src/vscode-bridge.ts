@@ -12,6 +12,8 @@ import {
     CommandValidationConfig,
     RateLimitConfig
 } from './security';
+import { DANGEROUS_COMMANDS, DANGEROUS_PATTERNS } from './security/security-constants';
+import { findAvailablePort } from './utils/port-utils';
 
 interface TaskConfig {
     name: string;
@@ -78,7 +80,7 @@ export class VSCodeBridge {
             });
         });
 
-        const availablePort = await this.findAvailablePort();
+        const availablePort = await findAvailablePort();
         this.port = availablePort;
         
         await this.instancePublisher.registerInstance(
@@ -88,7 +90,19 @@ export class VSCodeBridge {
         );
         
         this.server.listen(this.port, 'localhost', () => {
-            console.log(`VSTR Bridge server listening on port ${this.port}`);
+            const config = vscode.workspace.getConfiguration('vstrBridge');
+            const silentMode = config.get('silentMode', false);
+            
+            if (!silentMode) {
+                vscode.window.showInformationMessage(
+                    'VSTR Bridge initialized successfully', 
+                    'Silence notifications'
+                ).then(selection => {
+                    if (selection === 'Silence notifications') {
+                        config.update('silentMode', true, vscode.ConfigurationTarget.Global);
+                    }
+                });
+            }
         });
     }
 
@@ -300,21 +314,6 @@ export class VSCodeBridge {
         });
     }
 
-    private async findAvailablePort(): Promise<number> {
-        const net = require('net');
-        
-        return new Promise((resolve, reject) => {
-            const server = net.createServer();
-            server.unref();
-            server.on('error', reject);
-            server.listen(0, () => {
-                const port = server.address()?.port;
-                server.close(() => {
-                    resolve(port);
-                });
-            });
-        });
-    }
 
     private loadSecurityConfig(): SecurityConfig {
         const vscodeConfig = vscode.workspace.getConfiguration('vstrBridge.security');
@@ -326,50 +325,9 @@ export class VSCodeBridge {
         };
 
         const validationConfig: CommandValidationConfig = {
-            dangerousCommands: {
-                unix: [
-                    'rm', 'rmdir', 'dd', 'mkfs', 'fdisk',
-                    'chmod', 'chown', 'su', 'sudo', 'passwd',
-                    'mount', 'umount', 'killall', 'pkill',
-                    'crontab', 'at', 'systemctl', 'service',
-                    'iptables', 'ufw', 'firewall-cmd',
-                    'userdel', 'usermod', 'groupdel'
-                ],
-                windows: [
-                    'del', 'erase', 'rd', 'rmdir', 'format',
-                    'diskpart', 'bcdedit', 'reg', 'regedit',
-                    'sc', 'net', 'runas', 'takeown', 'icacls',
-                    'schtasks', 'at', 'shutdown', 'restart',
-                    'netsh', 'wmic', 'powershell', 'cmd'
-                ],
-                common: [
-                    'curl', 'wget', 'bash', 'sh', 'zsh', 'fish',
-                    'telnet', 'nc', 'netcat', 'nmap', 'nslookup',
-                    'kill', 'killall', 'taskkill', 'exec',
-                    'eval', 'source', 'alias'
-                ]
-            },
+            dangerousCommands: DANGEROUS_COMMANDS,
             developmentSafeCommands: vscodeConfig.get('additionalSafeCommands', []),
-            dangerousPatterns: [
-                /[;&|`$()]/,
-                /\.\.\//,
-                /\/etc\//,
-                /\/var\//,
-                /\/home\/.*\/\./,
-                /C:\\Windows\\/,
-                /C:\\System/,
-                /\$\{.*\}/,
-                /\$\(.*\)/,
-                />\s*\/dev\//,
-                />\s*NUL/,
-                /\|\s*(sudo|su)\s/,
-                /(&&|\|\|)\s*(sudo|su)\s/,
-                /\bbase64\b.*-d/,
-                /\b(chmod|chown)\s+[0-7]{3,4}/,
-                /\bfind\s+\/.*-exec/,
-                /\bxargs\b/,
-                /\b(nc|netcat)\s+.*-e/,
-            ],
+            dangerousPatterns: DANGEROUS_PATTERNS,
             maxCommandLength: 500
         };
 
@@ -400,12 +358,40 @@ export class VSCodeBridge {
     }
 
     showStatus(): void {
-        const status = `VSTR Bridge Status:
-- Port: ${this.port}
-- Instance ID: ${this.instanceId}
-- Database: ${this.databaseManager.getDatabasePath()}
-- Security: ${this.config.strictMode ? 'Strict Mode' : 'Permissive Mode'}`;
+        const stats = this.securityMiddleware.getSecurityStats();
+        const message = `VSTR Bridge Status:
+• Status: Active
+• Port: ${this.port}
+• Instance ID: ${this.instanceId}
+• Workspace: ${vscode.workspace.name || 'Untitled'}
+• Database: ${this.databaseManager.getDatabasePath()}
+• Security: ${stats.config.strictMode ? 'Strict Mode' : 'Permissive Mode'}
+• Blocked Clients: ${stats.blockedClients}
+• Safe Commands: ${stats.safeCommandsCount}
+• Audit Entries: ${stats.logStats.entries}`;
 
-        vscode.window.showInformationMessage(status);
+        vscode.window.showInformationMessage(message, 'View Logs', 'Security Config')
+            .then(selection => {
+                if (selection === 'View Logs') {
+                    this.openAuditLogs();
+                } else if (selection === 'Security Config') {
+                    this.showSecuritySettings();
+                }
+            });
+    }
+
+    private openAuditLogs(): void {
+        const auditLogger = this.securityMiddleware.getAuditLogger();
+        try {
+            vscode.workspace.openTextDocument(auditLogger.getLogPath()).then(doc => {
+                vscode.window.showTextDocument(doc);
+            });
+        } catch (error) {
+            vscode.window.showErrorMessage('Failed to open audit logs');
+        }
+    }
+
+    private showSecuritySettings(): void {
+        vscode.commands.executeCommand('workbench.action.openSettings', 'vstrBridge.security');
     }
 }
