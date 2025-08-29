@@ -1,18 +1,16 @@
 import { DatabaseManager } from './connection';
 import { CryptoManager, EncryptionResult } from '../cipher/crypto';
-import Database from 'better-sqlite3';
+import { Credential } from './models';
 import * as crypto from 'crypto';
+import { Op } from 'sequelize';
 
 export class CredentialsPublisher {
-    private db: Database.Database;
     private refillTimeouts = new Map<number, NodeJS.Timeout>();
 
     constructor(
         private databaseManager: DatabaseManager,
         private cryptoManager: CryptoManager
-    ) {
-        this.db = databaseManager.getConnection();
-    }
+    ) {}
 
     async initializeCredentialPool(instanceId: number, poolSize: number): Promise<void> {
         for (let i = 0; i < poolSize; i++) {
@@ -44,25 +42,28 @@ export class CredentialsPublisher {
     }
 
     async getCredentialCount(instanceId: number): Promise<number> {
-        const stmt = this.db.prepare(`
-            SELECT COUNT(*) as count 
-            FROM credentials 
-            WHERE instance_id = ? AND expires_at > strftime('%s', 'now')
-        `);
+        const currentTimestamp = Math.floor(Date.now() / 1000);
         
-        const result = stmt.get(instanceId) as { count: number };
-        return result.count;
+        return await Credential.count({
+            where: {
+                instance_id: instanceId,
+                expires_at: {
+                    [Op.gt]: currentTimestamp
+                }
+            }
+        });
     }
 
     private async storeEncryptedCredential(instanceId: number, encrypted: EncryptionResult, ttlSeconds: number): Promise<void> {
         const expiresAt = Math.floor(Date.now() / 1000) + ttlSeconds;
         
-        const stmt = this.db.prepare(`
-            INSERT INTO credentials (instance_id, ciphertext, salt, iv, expires_at)
-            VALUES (?, ?, ?, ?, ?)
-        `);
-        
-        stmt.run(instanceId, encrypted.ciphertext, encrypted.salt, encrypted.iv, expiresAt);
+        await Credential.create({
+            instance_id: instanceId,
+            ciphertext: encrypted.ciphertext,
+            salt: encrypted.salt,
+            iv: encrypted.iv,
+            expires_at: expiresAt
+        });
     }
 
     private generateUniqueToken(): string {
@@ -70,24 +71,28 @@ export class CredentialsPublisher {
     }
 
     async getAvailableCredential(instanceId: number): Promise<{ ciphertext: Buffer; salt: Buffer; iv: Buffer } | null> {
-        const stmt = this.db.prepare(`
-            SELECT id, ciphertext, salt, iv 
-            FROM credentials 
-            WHERE instance_id = ? AND expires_at > strftime('%s', 'now')
-            LIMIT 1
-        `);
+        const currentTimestamp = Math.floor(Date.now() / 1000);
         
-        const credential = stmt.get(instanceId) as { id: number; ciphertext: Buffer; salt: Buffer; iv: Buffer } | undefined;
+        const credential = await Credential.findOne({
+            where: {
+                instance_id: instanceId,
+                expires_at: {
+                    [Op.gt]: currentTimestamp
+                }
+            },
+            limit: 1
+        });
         
         if (credential) {
-            const deleteStmt = this.db.prepare('DELETE FROM credentials WHERE id = ?');
-            deleteStmt.run(credential.id);
-            
-            return {
+            const result = {
                 ciphertext: credential.ciphertext,
                 salt: credential.salt,
                 iv: credential.iv
             };
+            
+            await credential.destroy();
+            
+            return result;
         }
         
         return null;
