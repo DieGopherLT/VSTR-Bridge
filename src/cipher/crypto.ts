@@ -27,7 +27,7 @@ export class CryptoManager {
         
         const derivedKey = crypto.pbkdf2Sync(this.key, salt, 100000, this.keyLength, 'sha256');
         
-        const cipher = crypto.createCipher('aes-256-cbc', derivedKey);
+        const cipher = crypto.createCipheriv(this.algorithm, derivedKey, iv);
         cipher.setAutoPadding(true);
         
         let ciphertext = cipher.update(plaintext, 'utf8');

@@ -50,8 +50,6 @@ export class VSCodeBridge {
         const systemKey = deriveSystemKey();
         this.cryptoManager = new CryptoManager(systemKey);
        
-        console.log('First part of services initialized');        
-
         this.instancePublisher = new InstancePublisher(this.databaseManager);
         this.credentialsPublisher = new CredentialsPublisher(this.databaseManager, this.cryptoManager);
         
@@ -61,7 +59,9 @@ export class VSCodeBridge {
         );
     }
 
-    async start(): Promise<void> { 
+    async start(): Promise<void> {
+        await this.databaseManager.initialize();
+        
         this.instanceId = await this.instancePublisher.registerInstance(
             this.port,
             vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '',
@@ -396,7 +396,7 @@ export class VSCodeBridge {
             await this.instancePublisher.cleanupInstance(this.instanceId);
         }
 
-        this.databaseManager.close();
+        await this.databaseManager.close();
     }
 
     showStatus(): void {

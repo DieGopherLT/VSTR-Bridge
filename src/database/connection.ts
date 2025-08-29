@@ -1,10 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import Database from 'better-sqlite3';
+import { Sequelize } from 'sequelize';
+import { initializeModels } from './models';
 
 export class DatabaseManager {
-    private db: Database.Database | null = null;
+    private sequelize: Sequelize | null = null;
     private readonly dbPath: string;
 
     constructor() {
@@ -14,12 +15,26 @@ export class DatabaseManager {
         if (!fs.existsSync(dbDir)) {
             fs.mkdirSync(dbDir, { recursive: true, mode: 0o700 });
         }
-    
+    }
+
+    async initialize(): Promise<void> {
+        if (this.sequelize) {
+            return;
+        }
+
+        this.sequelize = new Sequelize({
+            dialect: 'sqlite',
+            storage: this.dbPath,
+            logging: false,
+        });
+
+        initializeModels(this.sequelize);
+
+        await this.sequelize.sync();
+        
         fs.chmodSync(this.dbPath, 0o600);
-        const db = new Database(this.dbPath, { fileMustExist: true });
-        this.db = db;
-    
-        console.log('Database name: ', db.name);
+        
+        console.log('Database initialized:', this.dbPath);
     }
 
     getDatabasePath(): string {
@@ -28,17 +43,17 @@ export class DatabaseManager {
     }
 
 
-    getConnection(): Database.Database {
-        if (!this.db) {
-            throw new Error('Database not initialized');
+    async getConnection(): Promise<Sequelize> {
+        if (!this.sequelize) {
+            await this.initialize();
         }
-        return this.db;
+        return this.sequelize!;
     }
 
-    close(): void {
-        if (this.db) {
-            this.db.close();
-            this.db = null;
+    async close(): Promise<void> {
+        if (this.sequelize) {
+            await this.sequelize.close();
+            this.sequelize = null;
         }
     }
 }

@@ -1,47 +1,41 @@
 import { DatabaseManager } from './connection';
-import Database from 'better-sqlite3';
+import { Instance } from './models';
 
 export class InstancePublisher {
-    private db: Database.Database;
-
-    constructor(private databaseManager: DatabaseManager) {
-        this.db = databaseManager.getConnection();
-    }
+    constructor(private databaseManager: DatabaseManager) {}
 
     async registerInstance(port: number, workspacePath: string, workspaceName: string): Promise<number> {
-        const stmt = this.db.prepare(`
-            INSERT INTO instances (port, workspace_path, workspace_name)
-            VALUES (?, ?, ?)
-        `);
-        
         try {
-            const result = stmt.run(port, workspacePath, workspaceName);
-            return result.lastInsertRowid as number;
+            const [instance, created] = await Instance.findOrCreate({
+                where: { port },
+                defaults: {
+                    port,
+                    workspace_path: workspacePath,
+                    workspace_name: workspaceName,
+                },
+            });
+            
+            return instance.id;
         } catch (error) {
-            if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
-                const existingStmt = this.db.prepare('SELECT id FROM instances WHERE port = ?');
-                const existing = existingStmt.get(port) as { id: number } | undefined;
-                
-                if (existing) {
-                    return existing.id;
-                }
-            }
             throw error;
         }
     }
 
     async cleanupInstance(instanceId: number): Promise<void> {
-        const stmt = this.db.prepare('DELETE FROM instances WHERE id = ?');
-        stmt.run(instanceId);
+        await Instance.destroy({
+            where: { id: instanceId }
+        });
     }
 
     async getInstance(instanceId: number): Promise<{ id: number; port: number; workspace_path: string; workspace_name: string } | null> {
-        const stmt = this.db.prepare('SELECT * FROM instances WHERE id = ?');
-        return stmt.get(instanceId) as any || null;
+        const instance = await Instance.findByPk(instanceId);
+        return instance ? instance.toJSON() : null;
     }
 
     async getInstanceByPort(port: number): Promise<{ id: number; port: number; workspace_path: string; workspace_name: string } | null> {
-        const stmt = this.db.prepare('SELECT * FROM instances WHERE port = ?');
-        return stmt.get(port) as any || null;
+        const instance = await Instance.findOne({
+            where: { port }
+        });
+        return instance ? instance.toJSON() : null;
     }
 }
