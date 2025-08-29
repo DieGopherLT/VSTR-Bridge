@@ -52,23 +52,51 @@ npm run publish
 
 **Security System** (`src/security/`):
 - `SecurityMiddleware`: Central security orchestrator
-- `AuthManager`: Token-based authentication
-- `CommandValidator`: Blocks dangerous commands and patterns
+- `AuthManager`: Token-based authentication with timing-safe validation
+- `CommandValidator`: Blocks dangerous commands and patterns using blacklists
 - `RateLimiter`: Request rate limiting per client
 - `AuditLogger`: Security event logging
-- `SecureFileManager`: Safe bridge info file management
-- `CorsManager`: CORS policy enforcement
+- `CorsManager`: CORS policy enforcement (vscode-file://, vscode-app://)
+
+**Database System** (`src/database/`):
+- `DatabaseManager`: SQLite connection with 600 permissions in ~/.config/vstr/
+- `CredentialsPublisher`: Encrypted token pool management with TTL
+- `Models`: Instance and Credential tables with relationships
+
+**Encryption System** (`src/cipher/`):
+- `CryptoManager`: AES-256-CBC encryption with PBKDF2 key derivation
+- `keyDerivation`: System-specific key generation from USER:homedir:uid:platform
 
 ### Security Features
 
 The extension implements defense-in-depth security:
 
-1. **Authentication**: Token-based auth with environment variable injection
-2. **Command Validation**: Blocks dangerous commands (rm, sudo, etc.) and patterns
-3. **Rate Limiting**: 30 requests/minute per client by default
-4. **Audit Logging**: All security events logged with severity levels
-5. **File Validation**: Secure bridge info file management in temp directory
-6. **CORS Protection**: Restricted to VSCode origins only
+1. **Encrypted Authentication**: 
+   - Tokens encrypted with AES-256-CBC + PBKDF2 (100,000 iterations)
+   - System-derived keys from USER:homedir:uid:platform combination
+   - Timing-safe token validation to prevent timing attacks
+   - Token pool with automatic expiration (5 minutes TTL)
+
+2. **Command Validation**: 
+   - Blacklist of dangerous commands (rm, sudo, curl, etc.) per platform
+   - Suspicious pattern detection (shell injection, directory traversal, etc.)
+   - Maximum command length limits
+   - User-configurable safe command whitelist
+
+3. **Database Security**:
+   - SQLite file with 600 permissions (owner read/write only)
+   - Located in user home directory (~/.config/vstr/)
+   - Encrypted credentials stored as ciphertext + salt + IV
+   - Automatic cleanup of expired tokens
+
+4. **Network Security**:
+   - Rate limiting: 30 requests/minute per client by default
+   - CORS restricted to VSCode origins only (vscode-file://, vscode-app://)
+   - localhost-only binding
+   - Security headers (X-Content-Type-Options, X-Frame-Options, etc.)
+
+5. **Audit Logging**: All security events logged with severity levels
+6. **Zero Trust Policy**: Only accepts requests from verified VSCode terminals
 
 ### Configuration
 
@@ -80,11 +108,18 @@ Security settings configurable via VSCode settings (`vstrBridge.security.*`):
 
 ### Bridge Registration
 
-Extension automatically:
-1. Finds available port on localhost
-2. Creates bridge info file in temp directory with auth token
-3. Injects `VSTR` and `VSTR_TOKEN` environment variables
-4. Cleans up on deactivation
+**Setup Phase (CLI Responsibility)**:
+1. CLI creates SQLite database (~/.config/vstr/messenger.db) with 600 permissions
+2. CLI initializes database schema (instances, credentials tables)
+
+**Runtime Phase (Extension Responsibility)**:
+1. Extension finds available port on localhost
+2. Derives system-specific encryption key deterministically
+3. Registers instance in database (PID + port + workspace)
+4. Generates and encrypts initial token pool (3 tokens with 5-minute TTL)
+5. Starts HTTP server with security middleware
+6. Maintains token pool with reactive refill mechanism
+7. Cleans up instance and credentials on deactivation
 
 ### Terminal Integration
 
