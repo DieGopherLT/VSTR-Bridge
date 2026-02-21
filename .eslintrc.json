@@ -6,6 +6,14 @@
     "node": true,
     "es2020": true
   },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts"],
+      "env": {
+        "jest": true
+      }
+    }
+  ],
   "rules": {
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-explicit-any": "warn",
