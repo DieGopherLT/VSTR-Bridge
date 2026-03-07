@@ -1,111 +1,21 @@
 import * as vscode from 'vscode';
 import { SecureBridgeServer, VSCodeAdapter } from './secure-bridge-server';
-import { SecurityConfig, CommandValidationConfig, RateLimitConfig } from './security';
+import { SecurityConfig, RateLimitConfig } from './security';
+import { DEFAULT_VALIDATION_CONFIG } from './security/command-validator/defaults';
+import { VSCODE_ALLOWED_ORIGINS } from './security/cors-manager';
+import { DEFAULT_RATE_LIMIT_CONFIG } from './security/rate-limiter/defaults';
 
 function buildSecurityConfig(): SecurityConfig {
   const vscodeConfig = vscode.workspace.getConfiguration('vstrBridge.security');
 
   const rateLimitConfig: RateLimitConfig = {
-    maxRequestsPerMinute: vscodeConfig.get('maxRequestsPerMinute', 30),
-    windowSizeMs: 60000,
-    blockDurationMs: 300000,
+    ...DEFAULT_RATE_LIMIT_CONFIG,
+    maxRequestsPerMinute: vscodeConfig.get('maxRequestsPerMinute', DEFAULT_RATE_LIMIT_CONFIG.maxRequestsPerMinute),
   };
 
-  const validationConfig: CommandValidationConfig = {
-    dangerousCommands: {
-      unix: [
-        'rm',
-        'rmdir',
-        'dd',
-        'mkfs',
-        'fdisk',
-        'chmod',
-        'chown',
-        'su',
-        'sudo',
-        'passwd',
-        'mount',
-        'umount',
-        'killall',
-        'pkill',
-        'crontab',
-        'at',
-        'systemctl',
-        'service',
-        'iptables',
-        'ufw',
-        'firewall-cmd',
-        'userdel',
-        'usermod',
-        'groupdel',
-      ],
-      windows: [
-        'del',
-        'erase',
-        'rd',
-        'rmdir',
-        'format',
-        'diskpart',
-        'bcdedit',
-        'reg',
-        'regedit',
-        'sc',
-        'net',
-        'runas',
-        'takeown',
-        'icacls',
-        'schtasks',
-        'at',
-        'shutdown',
-        'restart',
-        'netsh',
-        'wmic',
-        'powershell',
-        'cmd',
-      ],
-      common: [
-        'curl',
-        'wget',
-        'bash',
-        'sh',
-        'zsh',
-        'fish',
-        'telnet',
-        'nc',
-        'netcat',
-        'nmap',
-        'nslookup',
-        'kill',
-        'killall',
-        'taskkill',
-        'exec',
-        'eval',
-        'source',
-        'alias',
-      ],
-    },
+  const validationConfig = {
+    ...DEFAULT_VALIDATION_CONFIG,
     developmentSafeCommands: vscodeConfig.get('additionalSafeCommands', []),
-    dangerousPatterns: [
-      /[;&|`$()]/,
-      /\.\.\//,
-      /\/etc\//,
-      /\/var\//,
-      /\/home\/.*\/\./,
-      /C:\\Windows\\/,
-      /C:\\System/,
-      /\$\{.*\}/,
-      /\$\(.*\)/,
-      />\s*\/dev\//,
-      />\s*NUL/,
-      /\|\s*(sudo|su)\s/,
-      /(&&|\|\|)\s*(sudo|su)\s/,
-      /\bbase64\b.*-d/,
-      /\b(chmod|chown)\s+[0-7]{3,4}/,
-      /\bfind\s+\/.*-exec/,
-      /\bxargs\b/,
-      /\b(nc|netcat)\s+.*-e/,
-    ],
-    maxCommandLength: 500,
   };
 
   return {
@@ -113,7 +23,7 @@ function buildSecurityConfig(): SecurityConfig {
     enableRateLimit: true,
     enableCommandValidation: true,
     enableAuditLogging: vscodeConfig.get('auditLogging', true),
-    allowedOrigins: ['vscode-file://', 'vscode-app://'],
+    allowedOrigins: [...VSCODE_ALLOWED_ORIGINS],
     rateLimitConfig,
     validationConfig,
   };

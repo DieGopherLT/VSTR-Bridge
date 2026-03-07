@@ -1,6 +1,6 @@
 import * as os from 'os';
 import * as path from 'path';
-import { FileSystem, SecureBridgeInfo, SecureFileManager } from './file-manager';
+import { FileSystem, SecureBridgeInfo, SecureFileManager } from '.';
 
 const buildMockFs = (): jest.Mocked<FileSystem> => ({
   readFileSync: jest.fn(),

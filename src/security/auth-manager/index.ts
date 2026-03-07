@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
+import { extractPermissionBits } from '../file-manager/permissions';
 
 export class AuthManager {
   private authToken: string;
@@ -56,7 +57,7 @@ export class AuthManager {
         return stats.isFile();
       }
 
-      const mode = stats.mode & parseInt('777', 8);
+      const mode = extractPermissionBits(stats);
 
       // CORREGIDO: Solo owner con permisos de lectura/escritura exclusivos
       return mode === 0o600 || mode === 0o400; // Solo lectura o lectura-escritura para owner

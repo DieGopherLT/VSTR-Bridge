@@ -1,6 +1,6 @@
 import * as http from 'http';
-import { SecurityMiddleware, SecurityMiddlewareDependencies } from './security-middleware';
-import { SecurityConfig } from './types';
+import { SecurityMiddleware, SecurityMiddlewareDependencies } from '.';
+import { SecurityConfig } from '../types';
 
 const buildMockAuthManager = () => ({
   validateToken: jest.fn().mockReturnValue(true),

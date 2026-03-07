@@ -1,6 +1,7 @@
 import * as http from 'http';
 import * as crypto from 'crypto';
-import { RateLimitConfig } from './types';
+import { RateLimitConfig } from '../types';
+import { DEFAULT_RATE_LIMIT_CONFIG } from './defaults';
 
 export class RateLimiter {
   private requestCounts = new Map<string, number[]>();
@@ -10,12 +11,7 @@ export class RateLimiter {
 
   constructor(config?: Partial<RateLimitConfig>, clock: () => number = Date.now) {
     this.clock = clock;
-    this.config = {
-      maxRequestsPerMinute: 30,
-      windowSizeMs: 60000, // 1 minuto
-      blockDurationMs: 300000, // 5 minutos
-      ...config,
-    };
+    this.config = { ...DEFAULT_RATE_LIMIT_CONFIG, ...config };
   }
 
   public checkRateLimit(clientId: string): boolean {

@@ -1,6 +1,6 @@
 import * as path from 'path';
-import { AuditLogger, NotificationHandler } from './audit-logger';
-import { FileSystem } from './file-manager';
+import { AuditLogger, NotificationHandler } from '.';
+import { FileSystem } from '../file-manager';
 
 const buildMockFs = (): jest.Mocked<FileSystem> => ({
   readFileSync: jest.fn(),
@@ -37,7 +37,7 @@ describe('AuditLogger', () => {
   describe('initialize', () => {
     it('creates the log file when it does not exist', () => {
       mockFs.existsSync.mockReturnValue(false);
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       logger.initialize();
 
@@ -47,7 +47,7 @@ describe('AuditLogger', () => {
     it('does not create the log file when it already exists', () => {
       mockFs.existsSync.mockReturnValue(true);
       mockFs.statSync.mockReturnValue({ mode: 0o100600 } as any);
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       logger.initialize();
 
@@ -60,7 +60,7 @@ describe('AuditLogger', () => {
 
       mockFs.existsSync.mockReturnValue(true);
       mockFs.statSync.mockReturnValue({ mode: 0o100644 } as any);
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       logger.initialize();
 
@@ -73,7 +73,7 @@ describe('AuditLogger', () => {
   describe('logSecurityEvent', () => {
     it('calls appendFileSync to write the log entry', () => {
       mockFs.statSync.mockReturnValue({ size: 0 } as any);
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       logger.logSecurityEvent({
         type: 'suspicious_activity',
@@ -89,7 +89,7 @@ describe('AuditLogger', () => {
 
     it('writes a JSON line that includes the event type and severity', () => {
       mockFs.statSync.mockReturnValue({ size: 0 } as any);
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       logger.logSecurityEvent({
         type: 'auth_failure',
@@ -106,7 +106,7 @@ describe('AuditLogger', () => {
 
     it('redacts IP addresses from the clientId in the log entry', () => {
       mockFs.statSync.mockReturnValue({ size: 0 } as any);
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       logger.logSecurityEvent({
         type: 'suspicious_activity',
@@ -124,7 +124,7 @@ describe('AuditLogger', () => {
   describe('severity notifications', () => {
     it('calls showError on the notification handler for critical severity', () => {
       mockFs.statSync.mockReturnValue({ size: 0 } as any);
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs, mockNotificationHandler);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs, notificationHandler: mockNotificationHandler });
 
       logger.logSecurityEvent({
         type: 'auth_failure',
@@ -142,7 +142,7 @@ describe('AuditLogger', () => {
     it('opens the log file when user selects View Logs on a critical event', async () => {
       mockFs.statSync.mockReturnValue({ size: 0 } as any);
       mockNotificationHandler.showError.mockResolvedValue('View Logs');
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs, mockNotificationHandler);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs, notificationHandler: mockNotificationHandler });
 
       logger.logSecurityEvent({
         type: 'auth_failure',
@@ -158,7 +158,7 @@ describe('AuditLogger', () => {
 
     it('calls showWarning on the notification handler for high severity', () => {
       mockFs.statSync.mockReturnValue({ size: 0 } as any);
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs, mockNotificationHandler);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs, notificationHandler: mockNotificationHandler });
 
       logger.logSecurityEvent({
         type: 'suspicious_activity',
@@ -172,7 +172,7 @@ describe('AuditLogger', () => {
 
     it('does not call the notification handler for medium severity', () => {
       mockFs.statSync.mockReturnValue({ size: 0 } as any);
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs, mockNotificationHandler);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs, notificationHandler: mockNotificationHandler });
 
       logger.logSecurityEvent({
         type: 'rate_limit_exceeded',
@@ -187,7 +187,7 @@ describe('AuditLogger', () => {
 
     it('does not call the notification handler for low severity', () => {
       mockFs.statSync.mockReturnValue({ size: 0 } as any);
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs, mockNotificationHandler);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs, notificationHandler: mockNotificationHandler });
 
       logger.logSecurityEvent({
         type: 'suspicious_activity',
@@ -202,7 +202,7 @@ describe('AuditLogger', () => {
 
     it('does not call the notification handler when none is provided', () => {
       mockFs.statSync.mockReturnValue({ size: 0 } as any);
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs, null);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs, notificationHandler: null });
 
       expect(() =>
         logger.logSecurityEvent({
@@ -220,7 +220,7 @@ describe('AuditLogger', () => {
       const logContent = '{"event":"auth_failure"}\n{"event":"suspicious_activity"}\n';
       mockFs.readFileSync.mockReturnValue(logContent);
       mockFs.statSync.mockReturnValue({ size: logContent.length } as any);
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       const stats = logger.getLogStats();
 
@@ -232,7 +232,7 @@ describe('AuditLogger', () => {
       mockFs.readFileSync.mockImplementation(() => {
         throw new Error('ENOENT: no such file');
       });
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       const stats = logger.getLogStats();
 
@@ -243,7 +243,7 @@ describe('AuditLogger', () => {
 
   describe('getLogPath', () => {
     it('returns the path to the audit log file', () => {
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       expect(logger.getLogPath()).toBe(logPath);
     });
@@ -255,7 +255,7 @@ describe('AuditLogger', () => {
     });
 
     it('logAuthFailure writes an auth_failure event with critical severity', () => {
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       logger.logAuthFailure('client-1');
 
@@ -266,7 +266,7 @@ describe('AuditLogger', () => {
     });
 
     it('logCommandBlocked writes a command_blocked event with high severity', () => {
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       logger.logCommandBlocked('rm -rf /', 'dangerous command', 'client-1');
 
@@ -277,7 +277,7 @@ describe('AuditLogger', () => {
     });
 
     it('logRateLimitExceeded writes a rate_limit_exceeded event with medium severity', () => {
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       logger.logRateLimitExceeded('client-1');
 
@@ -291,7 +291,7 @@ describe('AuditLogger', () => {
   describe('log rotation', () => {
     it('rotates the log file when it exceeds the max size', () => {
       const maxLogSize = 100;
-      const logger = new AuditLogger(bridgeDir, maxLogSize, 5, mockFs);
+      const logger = new AuditLogger({ bridgeDir, maxLogSize, maxLogFiles: 5, fileSystem: mockFs });
       mockFs.statSync.mockReturnValue({ size: maxLogSize + 1 } as any);
       mockFs.existsSync.mockReturnValue(false);
 
@@ -308,7 +308,7 @@ describe('AuditLogger', () => {
 
     it('renames existing rotated files before rotation', () => {
       const maxLogSize = 100;
-      const logger = new AuditLogger(bridgeDir, maxLogSize, 5, mockFs);
+      const logger = new AuditLogger({ bridgeDir, maxLogSize, maxLogFiles: 5, fileSystem: mockFs });
       mockFs.statSync.mockReturnValue({ size: maxLogSize + 1 } as any);
       mockFs.existsSync.mockImplementation((p: string) => (p as string).includes('audit.1.log'));
 
@@ -328,7 +328,7 @@ describe('AuditLogger', () => {
     it('deletes the oldest rotated file when it is at maxLogFiles - 1', () => {
       const maxLogSize = 100;
       const maxLogFiles = 3;
-      const logger = new AuditLogger(bridgeDir, maxLogSize, maxLogFiles, mockFs);
+      const logger = new AuditLogger({ bridgeDir, maxLogSize, maxLogFiles, fileSystem: mockFs });
       mockFs.statSync.mockReturnValue({ size: maxLogSize + 1 } as any);
       mockFs.existsSync.mockImplementation((p: string) => (p as string).includes(`audit.${maxLogFiles - 1}.log`));
 
@@ -345,7 +345,7 @@ describe('AuditLogger', () => {
 
   describe('clearLogs', () => {
     it('overwrites the log file with empty content', () => {
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       logger.clearLogs();
 
@@ -356,7 +356,7 @@ describe('AuditLogger', () => {
       mockFs.writeFileSync.mockImplementation(() => {
         throw new Error('Permission denied');
       });
-      const logger = new AuditLogger(bridgeDir, undefined, undefined, mockFs);
+      const logger = new AuditLogger({ bridgeDir, fileSystem: mockFs });
 
       expect(() => logger.clearLogs()).toThrow('Failed to clear logs');
     });
