@@ -1,4 +1,4 @@
-import { RateLimiter } from './rate-limiter';
+import { RateLimiter } from '.';
 
 describe('RateLimiter', () => {
   let currentTime: number;

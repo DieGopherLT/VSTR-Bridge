@@ -1,4 +1,4 @@
-import { CommandValidator } from './command-validator';
+import { CommandValidator } from '.';
 
 describe('CommandValidator', () => {
   describe('validateCommand', () => {

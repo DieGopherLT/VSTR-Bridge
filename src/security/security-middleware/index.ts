@@ -1,10 +1,10 @@
 import * as http from 'http';
-import { AuthManager } from './auth-manager';
-import { CommandValidator } from './command-validator';
-import { RateLimiter } from './rate-limiter';
-import { CorsManager } from './cors-manager';
-import { AuditLogger } from './audit-logger';
-import { SecurityConfig } from './types';
+import { AuthManager } from '../auth-manager';
+import { CommandValidator } from '../command-validator';
+import { RateLimiter } from '../rate-limiter';
+import { CorsManager } from '../cors-manager';
+import { AuditLogger } from '../audit-logger';
+import { SecurityConfig, SecurityStats } from '../types';
 
 export interface SecurityMiddlewareDependencies {
   authManager: AuthManager;
@@ -29,7 +29,7 @@ export class SecurityMiddleware {
     this.commandValidator = dependencies?.commandValidator ?? new CommandValidator(config.validationConfig);
     this.rateLimiter = dependencies?.rateLimiter ?? new RateLimiter(config.rateLimitConfig);
     this.corsManager = dependencies?.corsManager ?? new CorsManager(config.allowedOrigins);
-    this.auditLogger = dependencies?.auditLogger ?? new AuditLogger(bridgeDir);
+    this.auditLogger = dependencies?.auditLogger ?? new AuditLogger({ bridgeDir });
 
     this.cleanupInterval = setInterval(
       () => {
@@ -159,7 +159,7 @@ export class SecurityMiddleware {
     return isSuccessful;
   }
 
-  public getSecurityStats(): any {
+  public getSecurityStats(): SecurityStats {
     return {
       blockedClients: this.rateLimiter.getBlockedClients().length,
       allowedOrigins: this.corsManager.getAllowedOrigins(),

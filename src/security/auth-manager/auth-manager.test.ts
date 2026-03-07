@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { AuthManager } from './auth-manager';
+import { AuthManager } from '.';
 
 describe('AuthManager', () => {
   describe('validateToken', () => {

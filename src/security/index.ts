@@ -1,9 +1,9 @@
 export { AuthManager } from './auth-manager';
 export { CommandValidator } from './command-validator';
 export { RateLimiter } from './rate-limiter';
-export { CorsManager } from './cors-manager';
+export { CorsManager, VSCODE_ALLOWED_ORIGINS } from './cors-manager';
 export { AuditLogger } from './audit-logger';
-export type { NotificationHandler } from './audit-logger';
+export type { NotificationHandler, AuditLoggerConfig } from './audit-logger';
 export { SecureFileManager } from './file-manager';
 export type { FileSystem } from './file-manager';
 export { SecurityMiddleware } from './security-middleware';

@@ -1,49 +1,9 @@
-import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-
-export interface SecureBridgeInfo {
-  port: number;
-  pid: number;
-  instance_id: number;
-  workspace_path: string;
-  workspace_name: string;
-  timestamp: string;
-  auth_token: string;
-  secure: boolean;
-}
-
-export interface FileSystem {
-  existsSync(path: string): boolean;
-  mkdirSync(path: string, options?: { recursive?: boolean; mode?: number }): void;
-  writeFileSync(path: string, data: string, options?: { mode?: number }): void;
-  readFileSync(path: string, encoding: string): string;
-  statSync(path: string): fs.Stats;
-  chmodSync(path: string, mode: number): void;
-  readdirSync(path: string): string[];
-  unlinkSync(path: string): void;
-  appendFileSync(path: string, data: string, options?: { mode?: number }): void;
-  renameSync(oldPath: string, newPath: string): void;
-}
-
-const defaultFileSystem: FileSystem = {
-  existsSync: fs.existsSync,
-  mkdirSync: (p, opts) => {
-    fs.mkdirSync(p, opts);
-  },
-  writeFileSync: (p, data, opts) => {
-    fs.writeFileSync(p, data, opts as fs.WriteFileOptions);
-  },
-  readFileSync: (p, enc) => fs.readFileSync(p, enc as BufferEncoding),
-  statSync: fs.statSync,
-  chmodSync: fs.chmodSync,
-  readdirSync: (p) => fs.readdirSync(p) as string[],
-  unlinkSync: fs.unlinkSync,
-  appendFileSync: (p, data, opts) => {
-    fs.appendFileSync(p, data, opts as fs.WriteFileOptions);
-  },
-  renameSync: fs.renameSync,
-};
+import { defaultFileSystem } from './default-fs';
+import { extractPermissionBits } from './permissions';
+export type { FileSystem, SecureBridgeInfo } from './types';
+import type { FileSystem, SecureBridgeInfo } from './types';
 
 export class SecureFileManager {
   private bridgeDir: string;
@@ -112,7 +72,7 @@ export class SecureFileManager {
         return stats.isFile();
       }
 
-      const mode = stats.mode & parseInt('777', 8);
+      const mode = extractPermissionBits(stats);
 
       return mode === 0o600 || mode === 0o400;
     } catch {
@@ -146,12 +106,15 @@ export class SecureFileManager {
 
   public cleanupBridgeFile(filePath: string): void {
     try {
-      if (this.fileSystem.existsSync(filePath)) {
-        if (!filePath.startsWith(this.bridgeDir)) {
-          throw new Error('Attempting to delete file outside bridge directory');
-        }
+      const resolvedPath = path.resolve(filePath);
+      const resolvedBridgeDir = path.resolve(this.bridgeDir);
 
-        this.fileSystem.unlinkSync(filePath);
+      if (!resolvedPath.startsWith(resolvedBridgeDir + path.sep)) {
+        throw new Error('Attempting to delete file outside bridge directory');
+      }
+
+      if (this.fileSystem.existsSync(resolvedPath)) {
+        this.fileSystem.unlinkSync(resolvedPath);
       }
     } catch (error) {
       throw new Error(`Failed to cleanup bridge file: ${error}`);

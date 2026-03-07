@@ -1,7 +1,8 @@
-import * as fs from 'fs';
 import * as path from 'path';
-import { SecurityEvent } from './types';
-import { FileSystem } from './file-manager';
+import { SecurityEvent } from '../types';
+import type { FileSystem } from '../file-manager/types';
+import { defaultFileSystem } from '../file-manager/default-fs';
+import { extractPermissionBits } from '../file-manager/permissions';
 
 export interface NotificationHandler {
   showError(message: string, ...actions: string[]): Promise<string | undefined>;
@@ -9,24 +10,13 @@ export interface NotificationHandler {
   openFile(filePath: string): void;
 }
 
-const defaultFileSystem: FileSystem = {
-  existsSync: fs.existsSync,
-  mkdirSync: (p, opts) => {
-    fs.mkdirSync(p, opts);
-  },
-  writeFileSync: (p, data, opts) => {
-    fs.writeFileSync(p, data, opts as fs.WriteFileOptions);
-  },
-  readFileSync: (p, enc) => fs.readFileSync(p, enc as BufferEncoding),
-  statSync: fs.statSync,
-  chmodSync: fs.chmodSync,
-  readdirSync: (p) => fs.readdirSync(p) as string[],
-  unlinkSync: fs.unlinkSync,
-  appendFileSync: (p, data, opts) => {
-    fs.appendFileSync(p, data, opts as fs.WriteFileOptions);
-  },
-  renameSync: fs.renameSync,
-};
+export interface AuditLoggerConfig {
+  bridgeDir: string;
+  maxLogSize?: number;
+  maxLogFiles?: number;
+  fileSystem?: FileSystem;
+  notificationHandler?: NotificationHandler | null;
+}
 
 export class AuditLogger {
   private logPath: string;
@@ -35,13 +25,13 @@ export class AuditLogger {
   private readonly fileSystem: FileSystem;
   private readonly notificationHandler: NotificationHandler | null;
 
-  constructor(
-    bridgeDir: string,
+  constructor({
+    bridgeDir,
     maxLogSize = 10 * 1024 * 1024,
     maxLogFiles = 5,
-    fileSystem: FileSystem = defaultFileSystem,
-    notificationHandler: NotificationHandler | null = null
-  ) {
+    fileSystem = defaultFileSystem,
+    notificationHandler = null,
+  }: AuditLoggerConfig) {
     this.logPath = path.join(bridgeDir, 'audit.log');
     this.maxLogSize = maxLogSize;
     this.maxLogFiles = maxLogFiles;
@@ -55,7 +45,7 @@ export class AuditLogger {
         this.fileSystem.writeFileSync(this.logPath, '', { mode: 0o600 });
       } else {
         const stats = this.fileSystem.statSync(this.logPath);
-        const mode = stats.mode & parseInt('777', 8);
+        const mode = extractPermissionBits(stats);
 
         if (process.platform !== 'win32' && mode > 0o600) {
           this.fileSystem.chmodSync(this.logPath, 0o600);

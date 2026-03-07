@@ -1,5 +1,5 @@
 import * as http from 'http';
-import { CorsManager } from './cors-manager';
+import { CorsManager } from '.';
 
 const buildMockRequest = (origin?: string, method = 'GET'): http.IncomingMessage => {
   const req = {
