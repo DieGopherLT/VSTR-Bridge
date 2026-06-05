@@ -23,9 +23,9 @@ Thumbs.db
 coverage/
 
 # Misc
-.env
 *.env
 
 *.md
 !README.md
 !CLAUDE.md
+config.bat
