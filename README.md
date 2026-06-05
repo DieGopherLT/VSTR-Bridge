@@ -1,4 +1,4 @@
-# 🌉 VSTR-Bridge - VSCode Extension
+# VSTR-Bridge - VSCode Extension
 
 > **Bridge the gap between CLI and VSCode** - Seamlessly execute terminal commands from VSCode Terminal Runner CLI
 
@@ -7,29 +7,29 @@
 [![Downloads](https://img.shields.io/visual-studio-marketplace/d/vstr.bridge?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=vstr.bridge)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
-## 🎯 What is VSTR-Bridge?
+## What is VSTR-Bridge?
 
 VSTR-Bridge is the **VSCode extension component** of the VSCode Terminal Runner ecosystem. It acts as a communication bridge between the [VSTR CLI tool](https://github.com/DieGopherLT/vscode-terminal-runner) and your VSCode workspace, enabling seamless terminal automation directly within your editor.
 
 **This extension is designed to work with the [VSCode Terminal Runner CLI](https://github.com/DieGopherLT/vscode-terminal-runner)**
 
-## 🔗 How It Works
+## How It Works
 
 1. **CLI Command**: You run `vstr workspace run my-project` in your terminal
 2. **Bridge Discovery**: CLI automatically detects the active VSCode instance
 3. **Terminal Creation**: Extension creates terminals and executes commands within VSCode
 4. **Workspace Integration**: All commands run in the context of your current workspace
 
-## ⚡ Key Features
+## Key Features
 
-- **🔍 Automatic Discovery**: CLI automatically finds the correct VSCode instance
-- **🏃‍♂️ Zero-Configuration**: Works out of the box with any VSCode workspace
-- **🔄 Multi-Instance Support**: Handles multiple VSCode windows intelligently
-- **🎯 Context-Aware**: Commands execute in the correct workspace directory
-- **🛡️ Secure Communication**: Local HTTP server with process validation
-- **📊 Status Monitoring**: Real-time bridge status and health checks
+- **Automatic Discovery**: CLI automatically finds the correct VSCode instance
+- **Zero-Configuration**: Works out of the box with any VSCode workspace
+- **Multi-Instance Support**: Handles multiple VSCode windows intelligently
+- **Context-Aware**: Commands execute in the correct workspace directory
+- **Secure Communication**: Local HTTP server with process validation
+- **Status Monitoring**: Real-time bridge status and health checks
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Installation
 
@@ -62,7 +62,7 @@ To verify the bridge is working:
 2. Run the command: **"VSTR Bridge: Show Status"** from Command Palette (`Ctrl+Shift+P`)
 3. You should see bridge information including port and workspace details
 
-## 🛠️ Technical Details
+## Technical Details
 
 ### Architecture
 
@@ -87,26 +87,26 @@ The extension automatically:
 3. Sets environment variables for integrated terminals
 4. Cleans up on deactivation
 
-## 📋 Requirements
+## Requirements
 
 - **VSCode**: Version 1.74.0 or higher
 - **Node.js**: Not required (bundled with extension)
 - **VSTR CLI**: Install from [here](https://github.com/DieGopherLT/vscode-terminal-runner)
 
-## 🎮 Commands
+## Commands
 
 | Command | Description |
 |---------|-------------|
 | `VSTR Bridge: Show Status` | Display bridge connection info |
 | `VSTR Bridge: Restart` | Restart the bridge server |
 
-## 🔧 Configuration
+## Configuration
 
 The extension works with zero configuration out of the box! No setup required.
 
 Optional customization available through VSCode settings if needed.
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### Bridge Not Found
 ```bash
@@ -125,12 +125,12 @@ vstr status
 - Extension automatically finds available ports
 - No manual configuration needed
 
-## 🔗 Related Projects
+## Related Projects
 
 - **[VSCode Terminal Runner (CLI)](https://github.com/DieGopherLT/vscode-terminal-runner)** - The main CLI tool
 - **[VSTR Documentation](https://github.com/DieGopherLT/vscode-terminal-runner/blob/main/docs/)** - Complete documentation
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md).
 
@@ -163,33 +163,33 @@ npm run package
 npm run publish
 ```
 
-## 📊 System Requirements
+## System Requirements
 
 - **VSCode**: 1.74.0+
 - **Operating Systems**: Windows, macOS, Linux
 - **Memory**: Minimal footprint (~2MB)
 - **Network**: Local HTTP communication only
 
-## 🔒 Security & Privacy
+## Security & Privacy
 
 - **Local Only**: All communication happens on localhost
 - **No External Connections**: Extension never connects to external services
 - **Process Validation**: Bridge validates parent VSCode process
 - **Automatic Cleanup**: Removes metadata files on deactivation
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🌟 Support
+## Support
 
-- 🐛 **Issues**: [Report bugs](https://github.com/DieGopherLT/VSTR-Bridge/issues)
-- 💡 **Feature Requests**: [Request features](https://github.com/DieGopherLT/VSTR-Bridge/issues)
-- 📚 **Documentation**: [Full docs](https://github.com/DieGopherLT/vscode-terminal-runner/blob/main/docs/)
-- ⭐ **Show Support**: Star this repository if VSTR-Bridge helps your workflow!
+- **Issues**: [Report bugs](https://github.com/DieGopherLT/VSTR-Bridge/issues)
+- **Feature Requests**: [Request features](https://github.com/DieGopherLT/VSTR-Bridge/issues)
+- **Documentation**: [Full docs](https://github.com/DieGopherLT/vscode-terminal-runner/blob/main/docs/)
+- **Show Support**: Star this repository if VSTR-Bridge helps your workflow!
 
 ---
 
-**Made with ❤️ for developers who love automation**
+**Made for developers who love automation**
 
 Part of the [VSCode Terminal Runner](https://github.com/DieGopherLT/vscode-terminal-runner) ecosystem.
