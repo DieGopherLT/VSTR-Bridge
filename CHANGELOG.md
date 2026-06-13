@@ -7,48 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.2.1] - 2026-06-12
+## [0.1.0] - 2026-06-12
 
-### Changed
-
-- Refactored security modules into feature subdirectories for better code organization
-- Applied DRY principles across security components
-
-### Fixed
-
-- Path traversal vulnerability in file manager security module
-
-## [0.2.0] - 2025-12-01
+First release.
 
 ### Added
 
-- Defense-in-depth security system:
-  - Token-based authentication (`AuthManager`)
-  - Command validation blocking dangerous patterns (`CommandValidator`)
-  - Per-client rate limiting, 30 req/min by default (`RateLimiter`)
-  - Security event audit logging (`AuditLogger`)
-  - Secure bridge info file management (`SecureFileManager`)
-  - CORS enforcement restricted to VSCode origins (`CorsManager`)
-- `.vscodeignore` to exclude markdown files (except root `README.md`) from the packaged extension
+- Local HTTP bridge server enabling the VSTR CLI to open terminals and execute commands within VSCode
+- Token-based authentication for CLI-extension communication
+- Automatic environment variable injection (`VSTR` and `VSTR_TOKEN`) into integrated terminals
+- Tilde path resolution (`~/`) for terminal working directories
+- Command validation blocking dangerous operations
+- Per-client rate limiting (30 requests/minute by default)
+- Audit logging for security events
+- CORS enforcement restricted to VSCode origins
+- "VSTR Bridge: Show Status" command
+- "VSTR Bridge: Restart" command
 
-### Fixed
-
-- Bridge port no longer exposed in extension startup output
-
-## [0.1.0] - 2025-10-01
-
-### Added
-
-- Base codebase: `SecureBridgeServer` HTTP server handling `/ping`, `/task`, `/workspace`, and `/security/status` endpoints
-- TypeScript compilation pipeline targeting ES2020
-- Tilde path resolution (`~/` support) for terminal working directories
-- Initial `README.md`
-
-### Fixed
-
-- Path resolution for working directories starting with `~/`
-
-[Unreleased]: https://github.com/DieGopherLT/VSTR-Bridge/compare/v0.2.1...HEAD
-[0.2.1]: https://github.com/DieGopherLT/VSTR-Bridge/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/DieGopherLT/VSTR-Bridge/compare/v0.1.0...v0.2.0
+[Unreleased]: https://github.com/DieGopherLT/VSTR-Bridge/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/DieGopherLT/VSTR-Bridge/releases/tag/v0.1.0
