@@ -29,3 +29,5 @@ coverage/
 *.md
 !README.md
 !CLAUDE.md
+!CHANGELOG.md
+!.claude/**/*.md
