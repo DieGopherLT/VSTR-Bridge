@@ -10,7 +10,7 @@ export const defaultFileSystem: FileSystem = {
     fs.writeFileSync(p, data, opts as fs.WriteFileOptions);
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readFileSync: (p, enc) => fs.readFileSync(p, enc as any) as string,
+  readFileSync: (p, enc) => fs.readFileSync(p, enc as any) as unknown as string,
   statSync: fs.statSync,
   chmodSync: fs.chmodSync,
   readdirSync: (p) => fs.readdirSync(p) as string[],
