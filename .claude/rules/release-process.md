@@ -18,7 +18,10 @@ the extension's runtime behavior.
 
 2. Update `CHANGELOG.md` following the Keep a Changelog format.
 3. Bump `version` in `package.json` to the new semver value.
-4. Commit both files together: `chore(release): bump version to vX.Y.Z`.
+4. Commit `CHANGELOG.md` and `package.json` together in a single commit. The bump is not a
+   standalone commit — it is part of the commit that justifies the version change (e.g. the
+   feature commit, the fix commit, or a dedicated release commit when there is no single
+   triggering change): `chore(release): bump version to vX.Y.Z`.
 5. Create and push the git tag:
 
    ```bash
