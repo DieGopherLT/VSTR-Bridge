@@ -17,7 +17,9 @@ the extension's runtime behavior.
    ```
 
 2. Update `CHANGELOG.md` following the Keep a Changelog format.
-3. Bump `version` in `package.json` to the new semver value.
+3. Bump `version` in `package.json` to the new semver value. **The tag and `package.json`
+   must match exactly** — the workflow uploads whichever `.vsix` `vsce` generates, and `vsce`
+   names it from `package.json`, not from the tag.
 4. Commit `CHANGELOG.md` and `package.json` together in a single commit. The bump is not a
    standalone commit — it is part of the commit that justifies the version change (e.g. the
    feature commit, the fix commit, or a dedicated release commit when there is no single
