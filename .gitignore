@@ -31,3 +31,4 @@ coverage/
 !CLAUDE.md
 !CHANGELOG.md
 !.claude/**/*.md
+.claude/worktrees
