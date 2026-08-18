@@ -13,7 +13,6 @@ logs/
 *.log
 
 # VS Code
-.vscode/
 
 # OS
 .DS_Store
@@ -31,4 +30,4 @@ coverage/
 !CHANGELOG.md
 !.claude/**/*.md
 .claude/worktrees
-config.bat
+.env
