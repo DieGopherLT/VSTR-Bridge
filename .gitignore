@@ -13,7 +13,6 @@ logs/
 *.log
 
 # VS Code
-.vscode/
 
 # OS
 .DS_Store
@@ -25,4 +24,4 @@ Thumbs.db
 *.md
 !README.md
 !CLAUDE.md
-config.bat
+.env
