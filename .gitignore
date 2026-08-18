@@ -23,6 +23,7 @@ Thumbs.db
 coverage/
 
 # Misc
+.env
 *.env
 
 *.md
@@ -31,4 +32,3 @@ coverage/
 !CHANGELOG.md
 !.claude/**/*.md
 .claude/worktrees
-config.bat
